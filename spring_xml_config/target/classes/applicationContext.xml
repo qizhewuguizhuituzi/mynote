@@ -2,10 +2,13 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/aop
-http://www.springframework.org/schema/aop/spring-aop.xsd">
+http://www.springframework.org/schema/aop/spring-aop.xsd
+http://www.springframework.org/schema/tx
+http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 
     <!--通过xml的形式将bean的创建教给spring容器,bean的属性的注入也在spring中配置-->
@@ -44,7 +47,7 @@ http://www.springframework.org/schema/aop/spring-aop.xsd">
     <bean id="logBeforeAdvice" class="com.zcb.aop.LogBeforeAdvice"/>
     <bean id="logAfterAdvice" class="com.zcb.aop.LogAfterAdvice"/>
     <bean id="studentService" class="com.zcb.service.StudentServiceImpl"/>
-    <aop:config>
+    <aop:config proxy-target-class="true">
         <aop:pointcut id="pointcut" expression="execution(* com.zcb.service.StudentServiceImpl.* (..))"/>
         <aop:advisor advice-ref="logBeforeAdvice" pointcut-ref="pointcut"/>
         <aop:advisor advice-ref="logAfterAdvice" pointcut-ref="pointcut"/>
@@ -62,7 +65,68 @@ http://www.springframework.org/schema/aop/spring-aop.xsd">
         </aop:aspect>
     </aop:config>
     <!--事务 ACID 原子性,一致性,事务隔离,持久化 spring可以接手mybatis的事务-->
-    <!--首先将spring整合mybatis的jar包要整进来把,然后配置mybatis,然后再考虑要不要添加xml约束什么的-->
+    <!--首先将spring整合mybatis的jar(mybatis-spring)包要整进来把,然后配置mybatis,然后再考虑要不要添加xml约束什么的-->
+    <!--替换mybatis的数据源,第三方的有很多可以使用spring,然后将数据源注入到spring容器-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <!--这点跟原来的配置文件没啥区别照抄-->
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/springtest?useSSL=true&amp;useUnicode=true&amp;characterEncoding=utf8&amp;serverTimezone=Asia/Shanghai"/>
+        <property name="username" value="root"/>
+        <property name="password" value="root"/>
+    </bean>
+    <!--配置sqlSessionFactory 关联mybatis 使用spring中的SqlSessionFactoryBean-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--其实这个mybatis的配置文件可以不用了 配置文件中的属性在这个类中都可以配置-->
+<!--
+        <property name="configLocation" value="mybatis-config.xml"/>
+-->
+        <property name="mapperLocations" value="classpath:com/zcb/dao/*.xml"/>
+        <property name="typeAliasesPackage" value="com.zcb.pojo"/>
+    </bean>
+    <!--注册sqlSession关联sqlSessionFactory-->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+    </bean>
+    <!--将mapper接口实现类注册到spring容器-->
+    <bean id="peopleMapper" class="com.zcb.dao.PeopleMapperImpl">
+        <property name="sqlSession" ref="sqlSession"/>
+    </bean>
 
+    <!--第二种实现-->
+    <bean id="peopleDao" class="com.zcb.dao.PeopleMapperImpl2">
+        <property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+    </bean>
+    <!--事务 首先要添加事务的约束 事务是基于aop实现的也不能缺少aop-->
+    <!--无论使用哪种事务(编程式或者声明式事务)都需要事务管理器-->
+    <!--事务管理器spring已经做了直接拿来注册使用就可以了-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--配置事务通知-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!--配置哪些方法使用事务以及配置事务的传播性-->
+            <tx:method name="add" propagation="REQUIRED"/>
+            <tx:method name="delete" propagation="REQUIRED"/>
+            <tx:method name="update" propagation="REQUIRED"/>
+            <tx:method name="search*" propagation="REQUIRED"/>
+            <tx:method name="get" read-only="true"/>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--配置aop织入事务-->
+    <aop:config>
+        <aop:pointcut id="txPointCut" expression="execution(* com.zcb.*.*.* (..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut"/>
+    </aop:config>
+    <!--事务配置搞定 看看能不能解决刚才的问题 冲啊测试去-->
+    <bean id="peopleController" class="com.zcb.controller.PeopleController">
+        <property name="peopleService" ref="peopleService"/>
+    </bean>
+    <bean id="peopleService" class="com.zcb.service.PeopleServiceImpl">
+        <property name="peopleMapper" ref="peopleMapper"/>
+    </bean>
 
 </beans>
