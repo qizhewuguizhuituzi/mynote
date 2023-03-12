@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/aop
+http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+    <!--通过xml的形式将bean的创建教给spring容器,bean的属性的注入也在spring中配置-->
+    <!--自动装配 使用bean标签中的autowire 设置一个bean的作用域可以使用scope-->
+    <bean id="address" class="com.zcb.pojo.Address">
+        <constructor-arg value="河南省原阳县某某村"/>
+    </bean>
+    <bean id="student" class="com.zcb.pojo.Student">
+        <property name="address" ref="address"/>
+        <property name="age" value="18"/>
+        <property name="name" value="张三"/>
+        <property name="friends">
+            <set>
+                <value>李四</value>
+                <value>王五</value>
+                <value>钱七</value>
+            </set>
+        </property>
+        <property name="hobby">
+            <list>
+                <value>listen music</value>
+                <value>play basketball</value>
+            </list>
+        </property>
+        <property name="result">
+            <map>
+                <entry key="语文" value="100"></entry>
+                <entry key="数学" value="100"></entry>
+                <entry key="英语" value="100"></entry>
+            </map>
+        </property>
+    </bean>
+    <!--如果要使用aop首先要想到的是添加依赖然后在spring配置文件中中添加aop约束-->
+    <!--首先把自己写好的通知以及要增强的类交给spring管理-->
+    <!--方式1 实现spring中的通知接口然后进行配置-->
+    <bean id="logBeforeAdvice" class="com.zcb.aop.LogBeforeAdvice"/>
+    <bean id="logAfterAdvice" class="com.zcb.aop.LogAfterAdvice"/>
+    <bean id="studentService" class="com.zcb.service.StudentServiceImpl"/>
+    <aop:config>
+        <aop:pointcut id="pointcut" expression="execution(* com.zcb.service.StudentServiceImpl.* (..))"/>
+        <aop:advisor advice-ref="logBeforeAdvice" pointcut-ref="pointcut"/>
+        <aop:advisor advice-ref="logAfterAdvice" pointcut-ref="pointcut"/>
+    </aop:config>
+    <!--自定义通知-->
+    <!--自定义通知的类给交给spring管理-->
+    <bean id="diyAdvice" class="com.zcb.aop.DiyAdvice"/>
+    <aop:config>
+        <!--切面-->
+        <aop:aspect ref="diyAdvice">
+            <!--切入点-->
+            <aop:pointcut id="pointcut" expression="execution(* com.zcb.service.StudentServiceImpl.* (..))"/>
+            <aop:before method="before" pointcut-ref="pointcut"/>
+            <aop:after method="after" pointcut-ref="pointcut"/>
+        </aop:aspect>
+    </aop:config>
+    <!--事务 ACID 原子性,一致性,事务隔离,持久化 spring可以接手mybatis的事务-->
+    <!--首先将spring整合mybatis的jar包要整进来把,然后配置mybatis,然后再考虑要不要添加xml约束什么的-->
+
+
+</beans>
