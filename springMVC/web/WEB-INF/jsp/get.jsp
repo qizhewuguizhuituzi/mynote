@@ -4,6 +4,6 @@
     <title>zcb</title>
 </head>
 <body>
-${msg}
+<h1>get</h1>
 </body>
 </html>

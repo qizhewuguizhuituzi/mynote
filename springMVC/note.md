@@ -1,0 +1,6 @@
+# 在启动tomcat的时候乱码,去修改tomcat的配置文件中的编码
+# 注意如果依赖中存在多个版本spring_web的依赖会报错启动
+# 如果想要将Web项目打成war包需要使用maven插件,然后将打好的war包直接放到tomcat的webapp目录下直接启动tomcat就可以了
+# 注意在idea中使用tomcat的时候,配置ContextApplication路径为 / 默认的会加上war包名称 
+# 在controller层中使用restfull风格如果返回的界面是jsp需要在web.xml和所在的jsp界面进行设置否则只能支持get和post请求
+# 可以学习下idea的.http的用法感觉挺好用的

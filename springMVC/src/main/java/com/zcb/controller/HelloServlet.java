@@ -1,7 +1,5 @@
 package com.zcb.controller;
 
-import org.springframework.stereotype.Controller;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +19,7 @@ public class HelloServlet extends HttpServlet {
         }
 //业务逻辑
 //视图跳转
-        req.getRequestDispatcher("/WEBINF/jsp/hello.jsp").forward(req,resp);
+        req.getRequestDispatcher("/WEB-INF/jsp/hello.jsp").forward(req,resp);
     }
 
     @Override
