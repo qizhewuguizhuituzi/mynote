@@ -4,3 +4,4 @@
 # 注意在idea中使用tomcat的时候,配置ContextApplication路径为 / 默认的会加上war包名称 
 # 在controller层中使用restfull风格如果返回的界面是jsp需要在web.xml和所在的jsp界面进行设置否则只能支持get和post请求
 # 可以学习下idea的.http的用法感觉挺好用的
+# 记录一个使用重定向的问题就是在重定向的时候不能重定向到WEB-INF/jsp的jsp中

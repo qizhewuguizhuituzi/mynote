@@ -65,12 +65,13 @@
             </resource>
         </resources>
         <plugins>
+            <!--打包war包的插件,记得把web.xml配置文件路径加上-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.1.1</version>
                 <configuration>
-                    <webXml>web\WEB-INF\web.xml</webXml>
+                    <webXml>src\main\webapp\WEB-INF\web.xml</webXml>
                 </configuration>
             </plugin>
         </plugins>
