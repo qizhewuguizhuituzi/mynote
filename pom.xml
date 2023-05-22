@@ -12,6 +12,8 @@
         <module>spring_xml_config</module>
         <module>spring_annotation_config</module>
         <module>springMVC</module>
+        <module>ssmDemo</module>
+        <module>shiro_test</module>
     </modules>
 
     <properties>

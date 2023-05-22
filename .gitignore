@@ -1,1 +1,8 @@
 
+/out/
+/springMVC/target/
+/spring_xml_config/target/
+/spring_annotation_config/target/
+/.idea/
+/spring_springMVC.iml
+/ssmDemo/target/
